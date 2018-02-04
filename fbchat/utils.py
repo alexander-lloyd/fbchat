@@ -113,6 +113,7 @@ class ReqUrl(object):
     GRAPHQL = "https://www.facebook.com/api/graphqlbatch/"
     ATTACHMENT_PHOTO = "https://www.facebook.com/mercury/attachments/photo/"
     EVENT_REMINDER = "https://www.facebook.com/ajax/eventreminder/create"
+    POLL = "https://www.messenger.com/messaging/group_polling/create_poll/?dpr=2"
 
     pull_channel = 0
 
@@ -188,6 +189,7 @@ def check_json(j):
         raise FBchatFacebookError('Error {} when sending request'.format(j['error']), fb_error_code=j['error'])
 
 def check_request(r, as_json=True):
+    print ("is it ok?", r.ok)
     if not r.ok:
         raise FBchatFacebookError('Error when sending request: Got {} response'.format(r.status_code), request_status_code=r.status_code)
 

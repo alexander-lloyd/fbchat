@@ -1168,6 +1168,22 @@ class Client(object):
 
         j = self._post(self.req_url.THREAD_EMOJI, data, fix_request=True, as_json=True)
 
+    def createPoll(self, question_str, options, thread_id, thread_type):
+        """False
+        Creates poll with the given options
+        """
+        thread_id, thread_type = self._getThread(thread_id, None)
+        full_data = {
+            'question_text': question_str,
+            'target_id': 1812634275453572,
+            'option_text_array': ["Option 1", "Option2"],
+            'option_is_selected_array': [0, 0],
+        }
+
+        j = self._post(self.req_url.POLL, full_data, fix_request=False, as_json=True)
+
+
+
     def reactToMessage(self, message_id, reaction):
         """
         Reacts to a message
@@ -1387,14 +1403,21 @@ class Client(object):
                     delta = m["delta"]
                     delta_type = delta.get("type")
                     metadata = delta.get("messageMetadata")
+                    
 
                     if metadata:
                         mid = metadata["messageId"]
                         author_id = str(metadata['actorFbId'])
                         ts = int(metadata.get("timestamp"))
 
+                    if delta_type == "group_poll":
+                        q = delta["untypedData"]["question_json"]
+                        jq = json.loads(q)
+                        poll_opts = jq.get("options")
+                        self.onPollUpdated(options=poll_opts)
+
                     # Added participants
-                    if 'addedParticipants' in delta:
+                    elif 'addedParticipants' in delta:
                         added_ids = [str(x['userFbId']) for x in delta['addedParticipants']]
                         thread_id = str(metadata['threadKey']['threadFbId'])
                         self.onPeopleAdded(mid=mid, added_ids=added_ids, author_id=author_id, thread_id=thread_id,
@@ -1466,6 +1489,7 @@ class Client(object):
 
                         # thread_id, thread_type = getThreadIdAndThreadType(delta)
                         self.onMarkedSeen(threads=threads, seen_ts=seen_ts, ts=delivered_ts, metadata=delta, msg=m)
+
 
                     # New message
                     elif delta.get("class") == "NewMessage":
@@ -1806,6 +1830,9 @@ class Client(object):
         """
         log.info("Marked messages as seen in threads {} at {}s".format([(x[0], x[1].name) for x in threads], seen_ts/1000))
 
+
+    def onPollUpdated(self, options):
+        pass
 
     def onPeopleAdded(self, mid=None, added_ids=None, author_id=None, thread_id=None, ts=None, msg=None):
         """
