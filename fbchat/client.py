@@ -1414,7 +1414,7 @@ class Client(object):
                         q = delta["untypedData"]["question_json"]
                         jq = json.loads(q)
                         poll_opts = jq.get("options")
-                        self.onPollUpdated(options=poll_opts)
+                        self.onPollUpdated(options=poll_opts, poll_id=jq.get("id"))
 
                     # Added participants
                     elif 'addedParticipants' in delta:
@@ -1831,7 +1831,7 @@ class Client(object):
         log.info("Marked messages as seen in threads {} at {}s".format([(x[0], x[1].name) for x in threads], seen_ts/1000))
 
 
-    def onPollUpdated(self, options):
+    def onPollUpdated(self, options, poll_id):
         pass
 
     def onPeopleAdded(self, mid=None, added_ids=None, author_id=None, thread_id=None, ts=None, msg=None):
